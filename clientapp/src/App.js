@@ -1,11 +1,13 @@
 import React, { Component } from "react";
 import "./App.css";
+import Hummingbird from "./Hummingbird";
 
 class App extends Component {
   render() {
     return (
       <div className="App">
-        <header className="App-header">
+        <Hummingbird />
+        {/* <header className="App-header">
           <h1>Trinidad and Tobago Hummingbird Classifier v0.01.2</h1>
           <p>
             {" "}
@@ -46,7 +48,7 @@ class App extends Component {
             <input type="url" name="url" />
             <input type="submit" value="Fetch and analyze image" />
           </form>
-        </header>
+        </header>*/}
       </div>
     );
   }

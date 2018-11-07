@@ -90,7 +90,7 @@ async def upload(request):
 
 @app.route("/classify-url", methods=["GET"])
 async def classify_url(request):
-    bytes = await get_bytes(request.query_params["url"])
+    bytes = await get_bytes(request.query_params["imageUrl"])
     return predict_image_from_bytes(bytes)
 
 @app.route("/")
