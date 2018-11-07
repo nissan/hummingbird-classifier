@@ -1,5 +1,7 @@
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse, HTMLResponse, RedirectResponse
+from starlette.routing import Router, Mount
+from starlette.staticfiles import StaticFiles
 from fastai.vision import (
     ImageDataBunch,
     create_cnn,
@@ -22,8 +24,11 @@ async def get_bytes(url):
             return await response.read()
 
 
-app = Starlette()
+# app = Starlette()
 
+app = Router(routes=[
+    Mount('/static/', app=StaticFiles(directory='clientapp/build')),
+])
 hb_images_path = Path("/tmp")
 hb_fnames = [
     "/{}_1.jpg".format(c)
@@ -36,12 +41,21 @@ hb_fnames = [
         'blue_tailed_emerald_male',
         'brown_violetear',
         'copper_rumped',
+        'green_hermit_female',
+        'green_hermit_male',
         'green_throated_mango',
+        'little_hermit',
         'long_billed_starthroat',
         'ruby_topaz_female',
         'ruby_topaz_male',
+        'rufous_breasted_hermit',
         'tufted_coquette_female',
-        'tufted_coquette_male'
+        'tufted_coquette_male',
+        'white_chested_emerald',
+        'white_necked_jacobin_female',
+        'white_necked_jacobin_male',
+        'white_tailed_goldenthroat',
+        'white_tailed_sabrewing'
     ]
 ]
 hb_data = ImageDataBunch.from_name_re(
@@ -53,8 +67,12 @@ hb_data = ImageDataBunch.from_name_re(
 )
 hb_learner = create_cnn(hb_data, models.resnet34)
 hb_learner.model.load_state_dict(
-    torch.load("stage-2-34.pth", map_location="cpu")
+    torch.load("stage-2-34_3.pth", map_location="cpu")
 )
+
+@app.route("/static")
+def redirect(request):
+  return RedirectResponse(url='/static/index.html')
 
 
 @app.route("/upload", methods=["POST"])
@@ -72,7 +90,7 @@ async def classify_url(request):
 
 def predict_image_from_bytes(bytes):
     img = open_image(BytesIO(bytes))
-    _,_,losses = hb_learner.predict(img)
+    _, _, losses = hb_learner.predict(img)
     return JSONResponse({
         "predictions": sorted(
             zip(hb_learner.data.classes, map(float, losses)),
@@ -86,23 +104,32 @@ def predict_image_from_bytes(bytes):
 def form(request):
     return HTMLResponse(
         """
-        <h1>Trinidad and Tobago Hummingbird Classifier</h1>
+        <h1>Trinidad and Tobago Hummingbird Classifier v0.01.2</h1>
         <p> This can distinguish among the following species
             <ul>
-                <li>Ruby Topaz Female</li>
-                <li>Ruby Topaz Male</li>
-                <li>Black Throated Mango Female</li>
-                <li>Black Throated Mango Male</li>
-                <li>Blue Chinned Sapphire Female</li>
-                <li>Blue Chinned Sapphire Male</li>
-                <li>Blue Tailed Emerald Female</li>
-                <li>Blue Tailed Emerald Male</li>
+                <li>Ruby Topaz (Female)</li>
+                <li>Ruby Topaz (Male)</li>
+                <li>Black Throated Mango (Female)</li>
+                <li>Black Throated Mango (Male)</li>
+                <li>Blue Chinned Sapphire (Female)</li>
+                <li>Blue Chinned Sapphire (Male)</li>
+                <li>Blue Tailed Emerald (Female)</li>
+                <li>Blue Tailed Emerald (Male)</li>
                 <li>Brown Violetear</li>
                 <li>Copper Rumped</li>
                 <li>Green Throated Mango</li>
                 <li>Long Billed Starthroat</li>
-                <li>Tufted Coquette Female</li>
-                <li>Tufted Coquette Male</li>
+                <li>Tufted Coquette (Female)</li>
+                <li>Tufted Coquette (Male)</li>
+                <li>Green Hermit (Female)</li>
+                <li>Green Hermit (Male)</li>
+                <li>Little Hermit</li>
+                <li>Rufous Breasted Hermit</li>
+                <li>White Chested Emerald</li>
+                <li>White Necked Jacobin (Female)</li>
+                <li>White Necked Jacobin (Male) </li>
+                <li>White Tailed Goldenthroat</li>
+                <li>White Tailed Sabrewing</li>
             </ul>
         </p>
         <form action="/upload" method="post" enctype="multipart/form-data">

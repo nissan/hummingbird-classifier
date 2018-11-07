@@ -8,15 +8,17 @@ RUN pip install torch_nightly -f https://download.pytorch.org/whl/nightly/cpu/to
 RUN pip install fastai
 
 # Install starlette and uvicorn
-RUN pip install starlette uvicorn python-multipart aiohttp
+RUN pip install starlette uvicorn python-multipart aiohttp aiofiles
 
-ADD hummingbird.py hummingbird.py
+COPY clientapp/build clientapp/build
+
+ADD app.py app.py
 ADD stage-2-34_3.pth stage-2-34_3.pth
 
 # Run it once to trigger resnet download
-RUN python hummingbird.py
+RUN python app.py
 
 EXPOSE 8008
 
 # Start the server
-CMD ["python", "hummingbird.py", "serve"]
+CMD ["python", "app.py", "serve"]
