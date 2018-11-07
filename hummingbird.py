@@ -18,10 +18,15 @@ import aiofiles
 from starlette.routing import Mount, Router
 from starlette.staticfiles import StaticFiles
 
+
+
 async def get_bytes(url):
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
             return await response.read()
+
+
+app = Starlette()
 
 hb_images_path = Path("/tmp")
 hb_fnames = [
@@ -50,7 +55,7 @@ hb_fnames = [
         'white_necked_jacobin_male',
         'white_tailed_goldenthroat',
         'white_tailed_sabrewing'
-    ]
+        ]
 ]
 hb_data = ImageDataBunch.from_name_re(
     hb_images_path,
@@ -65,22 +70,6 @@ hb_learner.model.load_state_dict(
 )
 
 
-def predict_image_from_bytes(bytes):
-    img = open_image(BytesIO(bytes))
-    _, _, losses = hb_learner.predict(img)
-    return JSONResponse({
-        "predictions": sorted(
-            zip(hb_learner.data.classes, map(float, losses)),
-            key=lambda p: p[1],
-            reverse=True
-        )
-    })
-
-app = Starlette()
-app.debug = True
-app.mount('/static', StaticFiles(directory="clientapp/build"))
-
-
 @app.route("/upload", methods=["POST"])
 async def upload(request):
     data = await request.form()
@@ -93,16 +82,69 @@ async def classify_url(request):
     bytes = await get_bytes(request.query_params["url"])
     return predict_image_from_bytes(bytes)
 
+
+def predict_image_from_bytes(bytes):
+    img = open_image(BytesIO(bytes))
+    _,_,losses = hb_learner.predict(img)
+    return JSONResponse({
+        "predictions": sorted(
+            zip(hb_learner.data.classes, map(float, losses)),
+            key=lambda p: p[1],
+            reverse=True
+        )
+    })
+
+
 @app.route("/")
-def redirect_index(request):
-  return RedirectResponse('/static/index.html')
+def form(request):
+    return HTMLResponse(
+        """
+        <h1>Trinidad and Tobago Hummingbird Classifier v0.01.1</h1>
+        <p> This can distinguish among the following species
+            <ul>
+                <li>Ruby Topaz (Female)</li>
+                <li>Ruby Topaz (Male)</li>
+                <li>Black Throated Mango (Female)</li>
+                <li>Black Throated Mango (Male)</li>
+                <li>Blue Chinned Sapphire (Female)</li>
+                <li>Blue Chinned Sapphire (Male)</li>
+                <li>Blue Tailed Emerald (Female)</li>
+                <li>Blue Tailed Emerald (Male)</li>
+                <li>Brown Violetear</li>
+                <li>Copper Rumped</li>
+                <li>Green Throated Mango</li>
+                <li>Long Billed Starthroat</li>
+                <li>Tufted Coquette (Female)</li>
+                <li>Tufted Coquette (Male)</li>
+                <li>Green Hermit (Female)</li>
+                <li>Green Hermit (Male)</li>
+                <li>Little Hermit</li>
+                <li>Rufous Breasted Hermit</li>
+                <li>White Chested Emerald</li>
+                <li>White Necked Jacobin (Female)</li>
+                <li>White Necked Jacobin (Male) </li>
+                <li>White Tailed Goldenthroat</li>
+                <li>White Tailed Sabrewing</li>
+            </ul>
+        </p>
+        <form action="/upload" method="post" enctype="multipart/form-data">
+            Select image to upload:
+            <input type="file" name="file">
+            <input type="submit" value="Upload Image">
+        </form>
+        Or submit a URL:
+        <form action="/classify-url" method="get">
+            <input type="url" name="url">
+            <input type="submit" value="Fetch and analyze image">
+        </form>
+    """)
+
 
 @app.route("/form")
 def redirect_to_homepage(request):
     return RedirectResponse("/")
 
+
 if __name__ == "__main__":
     if "serve" in sys.argv:
         uvicorn.run(app, host="0.0.0.0", port=8008)
-
-
