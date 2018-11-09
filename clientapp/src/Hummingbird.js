@@ -52,7 +52,7 @@ class Hummingbird extends Component {
   classify(url) {
     const form = new FormData();
     form.append("url", url);
-    fetch(`http://localhost:8008/classify-url?imageUrl=${url}`, {
+    fetch(`/classify-url?imageUrl=${url}`, {
       method: "GET",
       mode: "no-cors"
     })
@@ -120,7 +120,7 @@ class Hummingbird extends Component {
             <Jumbotron>
               <h1>
                 Trinidad and Tobago Hummingbird Classifier{" "}
-                <Badge color="info">V0.01.7</Badge>
+                <Badge color="info">V0.01.7.1</Badge>
               </h1>
               <p>
                 This website uses a Deep Learning model built using the{" "}
