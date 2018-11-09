@@ -11,7 +11,10 @@ import {
   Input,
   Label,
   Jumbotron,
-  Progress
+  Progress,
+  Container,
+  Row,
+  Col
 } from "reactstrap";
 
 class Hummingbird extends Component {
@@ -24,6 +27,7 @@ class Hummingbird extends Component {
     this.upload = this.upload.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.classify = this.classify.bind(this);
+    this.validateUrl = this.validateUrl.bind(this);
   }
   upload(file) {
     const form = new FormData();
@@ -58,6 +62,11 @@ class Hummingbird extends Component {
       .then(data => this.setState({ predictions: data.predictions }))
       .catch(error => console.log(error));
   }
+  validateUrl(url) {
+    return /^(?:(?:(?:https?|ftp):)?\/\/)(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:[/?#]\S*)?$/i.test(
+      url
+    );
+  }
   handleChange(event) {
     this.setState({
       file: URL.createObjectURL(event.target.files[0])
@@ -67,10 +76,12 @@ class Hummingbird extends Component {
   handleSubmit(event) {
     event.preventDefault();
     const imageUrl = event.target.imageUrl.value;
-    this.setState({
-      file: imageUrl
-    });
-    this.classify(imageUrl);
+    if (this.validateUrl(imageUrl)) {
+      this.setState({
+        file: imageUrl
+      });
+      this.classify(imageUrl);
+    }
   }
   render() {
     const predArray = [
@@ -102,116 +113,173 @@ class Hummingbird extends Component {
     const predMap = new Map(predArray);
 
     return (
-      <div>
-        <Jumbotron>
-          <h1>
-            Trinidad and Tobago Hummingbird Classifier{" "}
-            <Badge color="info">V0.01.6</Badge>
-          </h1>
-          <p>
-            This website uses a Deep Learning model built using the{" "}
-            <a href="https://fast.ai" target="_new">
-              Fast.ai
-            </a>{" "}
-            library and can classify the following species:
-            <span>
-              <Badge color="success" style={{ padding: 4, margin: 4 }}>
-                Ruby Topaz (Female)
-              </Badge>
-              <Badge color="success" style={{ padding: 4, margin: 4 }}>
-                Ruby Topaz (Male)
-              </Badge>
-              <Badge color="success" style={{ padding: 4, margin: 4 }}>
-                Black Throated Mango (Female)
-              </Badge>
-              <Badge color="success" style={{ padding: 4, margin: 4 }}>
-                Black Throated Mango (Male)
-              </Badge>
-              <Badge color="success" style={{ padding: 4, margin: 4 }}>
-                Blue Chinned Sapphire (Female)
-              </Badge>
-              <Badge color="success" style={{ padding: 4, margin: 4 }}>
-                Blue Chinned Sapphire (Male)
-              </Badge>
-              <Badge color="success" style={{ padding: 4, margin: 4 }}>
-                Blue Tailed Emerald (Female)
-              </Badge>
-              <Badge color="success" style={{ padding: 4, margin: 4 }}>
-                Blue Tailed Emerald (Male)
-              </Badge>
-              <Badge color="success" style={{ padding: 4, margin: 4 }}>
-                Brown Violetear
-              </Badge>
-              <Badge color="success" style={{ padding: 4, margin: 4 }}>
-                Copper Rumped
-              </Badge>
-              <Badge color="success" style={{ padding: 4, margin: 4 }}>
-                Green Throated Mango
-              </Badge>
-              <Badge color="success" style={{ padding: 4, margin: 4 }}>
-                Long Billed Starthroat
-              </Badge>
-              <Badge color="success" style={{ padding: 4, margin: 4 }}>
-                Tufted Coquette (Female)
-              </Badge>
-              <Badge color="success" style={{ padding: 4, margin: 4 }}>
-                Tufted Coquette (Male)
-              </Badge>
-              <Badge color="success" style={{ padding: 4, margin: 4 }}>
-                Green Hermit (Female)
-              </Badge>
-              <Badge color="success" style={{ padding: 4, margin: 4 }}>
-                Green Hermit (Male)
-              </Badge>
-              <Badge color="success" style={{ padding: 4, margin: 4 }}>
-                Little Hermit
-              </Badge>
-              <Badge color="success" style={{ padding: 4, margin: 4 }}>
-                Rufous Breasted Hermit
-              </Badge>
-              <Badge color="success" style={{ padding: 4, margin: 4 }}>
-                White Chested Emerald
-              </Badge>
-              <Badge color="success" style={{ padding: 4, margin: 4 }}>
-                White Necked Jacobin (Female)
-              </Badge>
-              <Badge color="success" style={{ padding: 4, margin: 4 }}>
-                White Necked Jacobin (Male){" "}
-              </Badge>
-              <Badge color="success" style={{ padding: 4, margin: 4 }}>
-                White Tailed Goldenthroat
-              </Badge>
-              <Badge color="success" style={{ padding: 4, margin: 4 }}>
-                White Tailed Sabrewing
-              </Badge>
+      <Container fluid>
+        <Row>
+          <Col>
+            {" "}
+            <Jumbotron>
+              <h1>
+                Trinidad and Tobago Hummingbird Classifier{" "}
+                <Badge color="info">V0.01.7</Badge>
+              </h1>
+              <p>
+                This website uses a Deep Learning model built using the{" "}
+                <a href="https://fast.ai" target="_new">
+                  Fast.ai
+                </a>{" "}
+                library and can classify the following species:
+                <span>
+                  <Badge color="success" style={{ padding: 4, margin: 4 }}>
+                    Ruby Topaz (Female)
+                  </Badge>
+                  <Badge color="success" style={{ padding: 4, margin: 4 }}>
+                    Ruby Topaz (Male)
+                  </Badge>
+                  <Badge color="success" style={{ padding: 4, margin: 4 }}>
+                    Black Throated Mango (Female)
+                  </Badge>
+                  <Badge color="success" style={{ padding: 4, margin: 4 }}>
+                    Black Throated Mango (Male)
+                  </Badge>
+                  <Badge color="success" style={{ padding: 4, margin: 4 }}>
+                    Blue Chinned Sapphire (Female)
+                  </Badge>
+                  <Badge color="success" style={{ padding: 4, margin: 4 }}>
+                    Blue Chinned Sapphire (Male)
+                  </Badge>
+                  <Badge color="success" style={{ padding: 4, margin: 4 }}>
+                    Blue Tailed Emerald (Female)
+                  </Badge>
+                  <Badge color="success" style={{ padding: 4, margin: 4 }}>
+                    Blue Tailed Emerald (Male)
+                  </Badge>
+                  <Badge color="success" style={{ padding: 4, margin: 4 }}>
+                    Brown Violetear
+                  </Badge>
+                  <Badge color="success" style={{ padding: 4, margin: 4 }}>
+                    Copper Rumped
+                  </Badge>
+                  <Badge color="success" style={{ padding: 4, margin: 4 }}>
+                    Green Throated Mango
+                  </Badge>
+                  <Badge color="success" style={{ padding: 4, margin: 4 }}>
+                    Long Billed Starthroat
+                  </Badge>
+                  <Badge color="success" style={{ padding: 4, margin: 4 }}>
+                    Tufted Coquette (Female)
+                  </Badge>
+                  <Badge color="success" style={{ padding: 4, margin: 4 }}>
+                    Tufted Coquette (Male)
+                  </Badge>
+                  <Badge color="success" style={{ padding: 4, margin: 4 }}>
+                    Green Hermit (Female)
+                  </Badge>
+                  <Badge color="success" style={{ padding: 4, margin: 4 }}>
+                    Green Hermit (Male)
+                  </Badge>
+                  <Badge color="success" style={{ padding: 4, margin: 4 }}>
+                    Little Hermit
+                  </Badge>
+                  <Badge color="success" style={{ padding: 4, margin: 4 }}>
+                    Rufous Breasted Hermit
+                  </Badge>
+                  <Badge color="success" style={{ padding: 4, margin: 4 }}>
+                    White Chested Emerald
+                  </Badge>
+                  <Badge color="success" style={{ padding: 4, margin: 4 }}>
+                    White Necked Jacobin (Female)
+                  </Badge>
+                  <Badge color="success" style={{ padding: 4, margin: 4 }}>
+                    White Necked Jacobin (Male){" "}
+                  </Badge>
+                  <Badge color="success" style={{ padding: 4, margin: 4 }}>
+                    White Tailed Goldenthroat
+                  </Badge>
+                  <Badge color="success" style={{ padding: 4, margin: 4 }}>
+                    White Tailed Sabrewing
+                  </Badge>
+                </span>
+              </p>
+            </Jumbotron>
+          </Col>
+        </Row>
+
+        <Row>
+          <Col>
+            <Form action="/upload" method="post" encType="multipart/form-data">
+              <FormGroup>
+                <Card>
+                  <CardBody>
+                    <CardTitle>
+                      <Label for="imageFile">Select File To Upload</Label>
+                    </CardTitle>
+                    <CardText>
+                      <Input
+                        type="file"
+                        name="file"
+                        id="imageFile"
+                        style={{ textAlign: "center", verticalAlign: "middle" }}
+                        onChange={this.handleChange}
+                      />
+                      <br /><br />
+                    </CardText>
+                  </CardBody>
+                </Card>
+              </FormGroup>
+            </Form>
+          </Col>
+          <Col sm="1" md="1" xs="1">
+            <span
+              style={{
+                verticalAlign: "middle",
+                textAlign: "center",
+                fontWeight: "bold"
+              }}
+            >
+              OR
             </span>
-          </p>
-        </Jumbotron>
-        <Form action="/upload" method="post" encType="multipart/form-data">
-          <FormGroup>
-            <Card>
-              <CardBody>
-                <CardTitle>
-                  <Label for="imageFile">Select File To Upload</Label>
-                </CardTitle>
-                <CardText>
-                  <Input
-                    type="file"
-                    name="file"
-                    id="imageFile"
-                    style={{ textAlign: "center", verticalAlign: "middle" }}
-                    onChange={this.handleChange}
-                  />
-                  {this.state.file !== undefined && (
-                    <img
-                      src={this.state.file}
-                      alt="file"
-                      style={{ width: "450px", height: "450px" }}
-                    />
-                  )}
-                </CardText>
-              </CardBody>
-            </Card>
+          </Col>
+          <Col>
+            <Form
+              onSubmit={
+                this.handleSubmit
+              } /*action="/classify-url" method="get" */
+            >
+              <FormGroup>
+                <Card>
+                  <CardBody>
+                    <CardTitle>
+                      <Label for="imageUrl">Enter Image URL</Label>
+                    </CardTitle>
+                    <CardText>
+                      <Input
+                        type="text"
+                        name="imageUrl"
+                        id="imageUrl"
+                        placeholder="https://"
+                      />
+                      <Button type="submit">Retrieve and classify image</Button>
+                    </CardText>
+                  </CardBody>
+                </Card>
+              </FormGroup>
+            </Form>
+          </Col>
+        </Row>
+        <Row>
+          <Col>
+            {this.state.file !== undefined && (
+              <img
+                src={this.state.file}
+                alt="file"
+                style={{ width: "350px", height: "350px" }}
+              />
+            )}
+          </Col>
+        </Row>
+        <Row>
+          <Col>
+            {" "}
             <Jumbotron style={{ backgroundColor: "cadetblue" }}>
               {this.state.predictions !== undefined &&
                 this.state.predictions.map(prediction => {
@@ -243,33 +311,9 @@ class Hummingbird extends Component {
                   } else return "";
                 })}
             </Jumbotron>
-          </FormGroup>
-          {/* <Button>Upload Image</Button> */}
-        </Form>
-        <hr />
-        <Form
-          onSubmit={this.handleSubmit} /*action="/classify-url" method="get" */
-        >
-          <FormGroup>
-            <Card>
-              <CardBody>
-                <CardTitle>
-                  <Label for="imageUrl">Enter Image URL</Label>
-                </CardTitle>
-                <CardText>
-                  <Input
-                    type="text"
-                    name="imageUrl"
-                    id="imageUrl"
-                    placeholder="https://"
-                  />
-                </CardText>
-              </CardBody>
-            </Card>
-          </FormGroup>
-          <Button type="submit">Retrieve and classify image</Button>
-        </Form>
-      </div>
+          </Col>
+        </Row>
+      </Container>
     );
   }
 }
