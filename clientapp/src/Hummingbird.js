@@ -22,6 +22,8 @@ class Hummingbird extends Component {
     super(props);
     this.handleChange = this.handleChange.bind(this);
     this.upload = this.upload.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.classify = this.classify.bind(this);
   }
   upload(file) {
     const form = new FormData();
@@ -32,22 +34,43 @@ class Hummingbird extends Component {
       body: form // This is your form object with file on body
     })
       .then(response => {
-        console.log(response);
+        // console.log(response);
         return response.json(); // if the response is a JSON object
       })
       .then(data => {
-        console.log(data); // Handle the success response object
+        // console.log(data); // Handle the success response object
         this.setState({ predictions: data.predictions });
       })
       .catch(
         error => console.log(error) // Handle the error response object
       );
   }
+  classify(url) {
+    const form = new FormData();
+    form.append("url", url);
+    fetch(`http://localhost:8008/classify-url?imageUrl=${url}`, {
+      method: "GET",
+      mode: "no-cors"
+    })
+      .then(response => {
+        return response.json();
+      })
+      .then(data => this.setState({ predictions: data.predictions }))
+      .catch(error => console.log(error));
+  }
   handleChange(event) {
     this.setState({
       file: URL.createObjectURL(event.target.files[0])
     });
     this.upload(event.target.files[0]);
+  }
+  handleSubmit(event) {
+    event.preventDefault();
+    const imageUrl = event.target.imageUrl.value;
+    this.setState({
+      file: imageUrl
+    });
+    this.classify(imageUrl);
   }
   render() {
     const predArray = [
@@ -83,7 +106,7 @@ class Hummingbird extends Component {
         <Jumbotron>
           <h1>
             Trinidad and Tobago Hummingbird Classifier{" "}
-            <Badge color="info">V0.01.5</Badge>
+            <Badge color="info">V0.01.6</Badge>
           </h1>
           <p>
             This website uses a Deep Learning model built using the{" "}
@@ -224,7 +247,9 @@ class Hummingbird extends Component {
           {/* <Button>Upload Image</Button> */}
         </Form>
         <hr />
-        <Form action="/classify-url" method="get">
+        <Form
+          onSubmit={this.handleSubmit} /*action="/classify-url" method="get" */
+        >
           <FormGroup>
             <Card>
               <CardBody>
@@ -242,7 +267,7 @@ class Hummingbird extends Component {
               </CardBody>
             </Card>
           </FormGroup>
-          <Button>Retrieve and classify image</Button>
+          <Button type="submit">Retrieve and classify image</Button>
         </Form>
       </div>
     );
