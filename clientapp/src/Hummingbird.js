@@ -19,7 +19,9 @@ import {
 
 class Hummingbird extends Component {
   state = {
-    file: undefined
+    file: undefined,
+    loading: false,
+    loaded: false
   };
   constructor(props) {
     super(props);
@@ -30,6 +32,7 @@ class Hummingbird extends Component {
     this.validateUrl = this.validateUrl.bind(this);
   }
   upload(file) {
+    this.setState({ loading: true });
     const form = new FormData();
     form.append("file", file);
     fetch("/upload", {
@@ -43,13 +46,18 @@ class Hummingbird extends Component {
       })
       .then(data => {
         // console.log(data); // Handle the success response object
-        this.setState({ predictions: data.predictions });
+        this.setState({
+          predictions: data.predictions,
+          loading: false,
+          loaded: true
+        });
       })
       .catch(
         error => console.log(error) // Handle the error response object
       );
   }
   classify(url) {
+    this.setState({ loading: true });
     const form = new FormData();
     form.append("url", url);
     fetch(`/classify-url?imageUrl=${url}`, {
@@ -59,7 +67,13 @@ class Hummingbird extends Component {
       .then(response => {
         return response.json();
       })
-      .then(data => this.setState({ predictions: data.predictions }))
+      .then(data =>
+        this.setState({
+          predictions: data.predictions,
+          loading: false,
+          loaded: true
+        })
+      )
       .catch(error => console.log(error));
   }
   validateUrl(url) {
@@ -120,7 +134,7 @@ class Hummingbird extends Component {
             <Jumbotron>
               <h1>
                 Trinidad and Tobago Hummingbird Classifier{" "}
-                <Badge color="info">V0.01.7.1</Badge>
+                <Badge color="info">V0.01.8</Badge>
               </h1>
               <p>
                 This website uses a Deep Learning model built using the{" "}
@@ -221,7 +235,8 @@ class Hummingbird extends Component {
                         style={{ textAlign: "center", verticalAlign: "middle" }}
                         onChange={this.handleChange}
                       />
-                      <br /><br />
+                      <br />
+                      <br />
                     </CardText>
                   </CardBody>
                 </Card>
@@ -279,38 +294,41 @@ class Hummingbird extends Component {
         </Row>
         <Row>
           <Col>
-            {" "}
-            <Jumbotron style={{ backgroundColor: "cadetblue" }}>
-              {this.state.predictions !== undefined &&
-                this.state.predictions.map(prediction => {
-                  if (prediction[1] * 100 > 10) {
-                    return (
-                      <React.Fragment>
-                        <div
-                          style={{
-                            padding: 4,
-                            margin: 4,
-                            backgroundColor: "#000"
-                          }}
-                        >
-                          <Progress
-                            color="success"
-                            value={prediction[1] * 100}
-                            max={100}
+            {this.state.loaded && (
+              <Jumbotron style={{ backgroundColor: "cadetblue" }}>
+                {this.state.loading && <div>Loading classifications...</div>}
+                {this.state.predictions !== undefined &&
+                  !this.state.loading &&
+                  this.state.predictions.map(prediction => {
+                    if (prediction[1] * 100 > 10) {
+                      return (
+                        <React.Fragment>
+                          <div
+                            style={{
+                              padding: 4,
+                              margin: 4,
+                              backgroundColor: "#000"
+                            }}
                           >
-                            <b>
-                              <span style={{ color: "#000" }}>
-                                {predMap.get(prediction[0])}|{" "}
-                                {(prediction[1] * 100).toFixed(2)}%
-                              </span>
-                            </b>
-                          </Progress>
-                        </div>
-                      </React.Fragment>
-                    );
-                  } else return "";
-                })}
-            </Jumbotron>
+                            <Progress
+                              color="success"
+                              value={prediction[1] * 100}
+                              max={100}
+                            >
+                              <b>
+                                <span style={{ color: "#000" }}>
+                                  {predMap.get(prediction[0])}|{" "}
+                                  {(prediction[1] * 100).toFixed(2)}%
+                                </span>
+                              </b>
+                            </Progress>
+                          </div>
+                        </React.Fragment>
+                      );
+                    } else return "";
+                  })}
+              </Jumbotron>
+            )}
           </Col>
         </Row>
       </Container>
